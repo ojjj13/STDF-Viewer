@@ -34,6 +34,7 @@ from pyqtgraph.icons import getGraphIcon
 from pyqtgraph.Point import Point
 from pyqtgraph.graphicsItems.ScatterPlotItem import drawSymbol
 import deps.SharedSrc as ss
+from deps.SharedSrc import strip_test_number
 
 pg.setConfigOptions(foreground='k', background='w', antialias=False)
 
@@ -628,8 +629,9 @@ class TrendChart(GraphicViewWithMenu):
         if y_min == y_max:
             y_min -= 1
             y_max += 1
-        # add title
-        self.plotlayout.addLabel(f"{test_num} {test_name}", row=0, col=0, 
+        # add title, remove trailing number in test name if any
+        base_name = strip_test_number(test_name)
+        self.plotlayout.addLabel(f"{test_num} {base_name}", row=0, col=0,
                                  rowspan=1, colspan=len(testInfo),
                                  size="20pt")
         # create same number of viewboxes as file counts
@@ -805,8 +807,9 @@ class HistoChart(TrendChart):
         if y_min == y_max:
             y_min -= 1
             y_max += 1
-        # add title
-        self.plotlayout.addLabel(f"{test_num} {test_name}", row=0, col=0, 
+        # add title, remove trailing number in test name if any
+        base_name = strip_test_number(test_name)
+        self.plotlayout.addLabel(f"{test_num} {base_name}", row=0, col=0,
                                  rowspan=1, colspan=len(testInfo),
                                  size="20pt")
         # create same number of viewboxes as file counts

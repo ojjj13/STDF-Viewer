@@ -367,6 +367,18 @@ class DatabaseFetcher:
             nested = TestFailCnt[(TEST_NUM, TEST_NAME)]
             nested[Fid] = FailCount
         return TestFailCnt
+
+
+    def getTestNameNumDict(self) -> dict:
+        '''return dict of Fid -> {TEST_NAME: TEST_NUM}'''
+        if self.cursor is None:
+            raise RuntimeError("No database is connected")
+
+        nameMap = {}
+        for Fid, TEST_NUM, TEST_NAME in self.cursor.execute(
+                "SELECT Fid, TEST_NUM, TEST_NAME FROM Test_Info"):
+            nameMap.setdefault(Fid, {})[TEST_NAME] = TEST_NUM
+        return nameMap
     
     
     def getDUTCountDict(self):
