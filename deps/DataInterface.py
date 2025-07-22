@@ -48,6 +48,7 @@ class DataInterface:
         self.completeWaferList = []
         # cache test pin list and names for MPR
         self.pinInfoDictCache = {}
+        self.testNameNumDict = {}
         
         
     def loadDatabase(self):
@@ -73,6 +74,7 @@ class DataInterface:
         self.SBIN_dict = self.DatabaseFetcher.getBinInfo(isHBIN=False)
         # for UI display
         self.completeTestList = self.DatabaseFetcher.getTestItemsList()
+        self.testNameNumDict = self.DatabaseFetcher.getTestNameNumDict()
         self.completeWaferList = self.DatabaseFetcher.getWaferList()
         
         
@@ -304,10 +306,18 @@ class DataInterface:
             outData["Max"] = np.nan
             outData["Median"] = np.nan
                 
-        outData["Mean"], outData["SDev"], outData["Cpk"] = calc_cpk(outData["LLimit"], 
-                                                                    outData["HLimit"], 
+        outData["Mean"], outData["SDev"], outData["Cpk"] = calc_cpk(outData["LLimit"],
+                                                                    outData["HLimit"],
                                                                     outData["dataList"])
         return outData
+
+    def _find_test_by_basename(self, basename: str, fid: int):
+        '''Return (test_num, test_name) in given file if basename matches.'''
+        name_map = self.testNameNumDict.get(fid, {})
+        for name, num in name_map.items():
+            if strip_test_number(name) == basename:
+                return num, name
+        return None
     
     
     def getTestDataFromHeadSite(self, testTuple: tuple, selectHeads:list[int], selectSites:list[int], FileID: int) -> dict:
@@ -325,6 +335,13 @@ class DataInterface:
         # testID -> (test_num, test_name)
         testID = (testTuple[0], testTuple[-1])
         testInfo = self.DatabaseFetcher.getTestInfo(testID, FileID)
+        if len(testInfo) == 0:
+            basename = strip_test_number(testTuple[-1])
+            alt = self._find_test_by_basename(basename, FileID)
+            if alt:
+                testID = alt
+                testTuple = (alt[0], testTuple[1], alt[1])
+                testInfo = self.DatabaseFetcher.getTestInfo(testID, FileID)
         if len(testInfo) == 0:
             return {}
         # add (head, site) list to testInfo for MPR
@@ -354,7 +371,14 @@ class DataInterface:
         testID = (testTuple[0], testTuple[-1])
         testInfo = self.DatabaseFetcher.getTestInfo(testID, FileID)
         if len(testInfo) == 0:
-            return {}        
+            basename = strip_test_number(testTuple[-1])
+            alt = self._find_test_by_basename(basename, FileID)
+            if alt:
+                testID = alt
+                testTuple = (alt[0], testTuple[1], alt[1])
+                testInfo = self.DatabaseFetcher.getTestInfo(testID, FileID)
+        if len(testInfo) == 0:
+            return {}
         # add (head, site) list to testInfo for MPR
         # it will be used for indexing channel name dict
         # 

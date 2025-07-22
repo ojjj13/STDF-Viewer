@@ -637,6 +637,18 @@ def parseTestString(test_name_string: str, isWaferName: bool = False) -> tuple:
         return (test_num, pmr, test_name)
 
 
+def strip_test_number(test_name: str) -> str:
+    '''
+    Return test name without the trailing number if it is separated by
+    whitespace. Used for matching test items whose last word is the test
+    number.
+    '''
+    parts = test_name.strip().split()
+    if parts and parts[-1].isdigit():
+        return " ".join(parts[:-1])
+    return test_name
+
+
 def openFileInOS(filepath: str):
     # https://stackoverflow.com/a/435669
     filepath = os.path.normpath(filepath)
@@ -796,8 +808,8 @@ __all__ = ["SettingParams", "tab", "REC", "symbolName", "symbolChar", "symbolCha
            "parseTestString", "isHexColor", "getProperFontColor", "init_logger", "runInQThread", 
            "loadFonts", "getLoadedFontNames", "rSymbol", "getIcon", "get_png_size", 
            "calc_cpk", "deleteWidget", "isPass", "isValidSymbol", "pyqtGraphPlot2Bytes", 
-           "showCompleteMessage", "rHEX", "get_file_size", "validateSession", 
-           
-           "translate_const_dicts", "dut_flag_parser", "test_flag_parser", "return_state_parser", 
-           "wafer_direction_name",
+           "showCompleteMessage", "rHEX", "get_file_size", "validateSession",
+
+           "translate_const_dicts", "dut_flag_parser", "test_flag_parser", "return_state_parser",
+           "wafer_direction_name", "strip_test_number",
            ]
